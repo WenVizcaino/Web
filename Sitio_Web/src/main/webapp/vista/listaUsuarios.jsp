@@ -1,37 +1,45 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8"
-    pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="java.util.*, Modelo.Usuario"%>
 
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <title>Lista de Usuarios</title>
 
-    <!-- Bootstrap CSS para estilos -->
+    <!-- Inclusión de Bootstrap CSS desde CDN para estilos modernos y responsive -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons para iconos en botones -->
+    
+    <!-- Inclusión de íconos de Bootstrap (Bootstrap Icons) -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
 
+    <!-- Estilos personalizados -->
     <style>
-        /* Estilos personalizados para la página */
         body {
-            background-color: #f8f9fa; /* Fondo claro */
+            background: linear-gradient(to right, #f8f9fa, #e9ecef); /* Fondo degradado */
         }
         .table-container {
-            background-color: #ffffff; /* Fondo blanco para el contenedor de la tabla */
+            background: #fff;
             padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05); /* Sombra sutil */
+            border-radius: 15px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1); /* Sombra elegante */
         }
         h2 {
-            color: #343a40; /* Color oscuro para el título */
+            font-weight: bold;
+            color: #212529;
         }
-        .btn-icon {
-            font-size: 1.2rem; /* Tamaño de iconos en botones */
+        .btn {
+            border-radius: 8px;
         }
-        .btn-icon:hover {
-            opacity: 0.8; /* Efecto hover más suave */
+        .btn i {
+            margin-right: 5px;
+        }
+        .table thead {
+            background: #343a40;
+            color: white;
+        }
+        .table-hover tbody tr:hover {
+            background-color: #f1f3f5;
         }
     </style>
 </head>
@@ -39,95 +47,102 @@
 <body class="container py-5">
     <div class="table-container">
 
-        <!-- Validación para mostrar alerta si no hay datos para generar el PDF -->
+        <!-- Alerta si no hay datos para generar PDF (se activa por parámetro GET "noData=true") -->
         <%
             String noData = request.getParameter("noData");
             if ("true".equals(noData)) {
         %>
-        <script>
-            alert("No hay usuarios registrados para generar el PDF.");
-        </script>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            No hay usuarios registrados para generar el PDF.
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
         <%
             }
         %>
 
-        <!-- Título principal -->
-        <h2 class="mb-4">Usuarios Registrados</h2>
+        <!-- Título principal de la página -->
+        <h2 class="mb-4 text-center">👥 Usuarios Registrados</h2>
 
-        <!-- Botones para agregar nuevo usuario y descargar PDF -->
-        <div class="mb-3 d-flex gap-2">
-            <!-- Botón para insertar nuevo usuario, redirige al formulario -->
+        <!-- Botones de acción: Agregar, PDF, Enviar correo -->
+        <div class="mb-4 d-flex justify-content-center gap-3">
+            <!-- Redirige a formulario para agregar usuario -->
             <a href="UsuarioServlet?action=insert" class="btn btn-dark">
-                <i class="bi bi-plus-circle"></i> Agregar nuevo usuario
+                <i class="bi bi-plus-circle"></i> Nuevo Usuario
             </a>
 
-            <!-- Botón para descargar el listado de usuarios en PDF -->
-            <a href="GenerarPdfServlet" class="btn btn-success" target="_blank">
+            <!-- Llama al Servlet que genera PDF (en nueva pestaña) -->
+            <a href="GenerarPdfServlet" class="btn btn-danger" target="_blank">
                 <i class="bi bi-file-earmark-pdf"></i> Descargar PDF
+            </a>
+
+            <!-- Redirige a la vista para enviar correo -->
+            <a href="vista/EnviarC.jsp" class="btn btn-success">
+                <i class="bi bi-envelope"></i> Enviar Correo
             </a>
         </div>
 
-        <!-- Tabla para mostrar los usuarios -->
+        <!-- Inicio de tabla de usuarios (se muestra solo si hay datos) -->
         <%
-            // Obtener la lista de usuarios desde el request
-            List<Usuario> users = (List<Usuario>) request.getAttribute("users");
+            List<Usuario> users = (List<Usuario>) request.getAttribute("users"); // Obtener lista de usuarios desde el Servlet
             if (users != null && !users.isEmpty()) {
         %>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle text-center">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Cédula</th>
+                        <th>Email</th>
+                        <th>Teléfono</th>
+                        <th>Dirección</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Iterar sobre la lista de usuarios -->
+                    <%
+                        for (Usuario user : users) {
+                    %>
+                    <tr>
+                        <td><%= user.getId() %></td>
+                        <td><%= user.getNombre() %></td>
+                        <td><%= user.getCedula() %></td>
+                        <td><%= user.getEmail() %></td>
+                        <td><%= user.getTelefono() %></td>
+                        <td><%= user.getDireccion() %></td>
+                        <td>
+                            <!-- Botón para editar usuario -->
+                            <a href="UsuarioServlet?action=edit&id=<%= user.getId() %>"
+                               class="btn btn-outline-primary btn-sm" title="Editar">
+                                <i class="bi bi-pencil-square"></i> Editar
+                            </a>
 
-        <table class="table table-hover align-middle">
-            <thead class="table-secondary">
-                <tr>
-                    <th>ID</th>
-                    <th>Nombre</th>
-                    <th>Cédula</th>
-                    <th>Email</th>
-                    <th>Teléfono</th>
-                    <th>Dirección</th>
-                    <th class="text-center">Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                <%
-                    // Iterar y mostrar cada usuario en una fila
-                    for (Usuario user : users) {
-                %>
-                <tr>
-                    <td><%= user.getId() %></td>
-                    <td><%= user.getNombre() %></td>
-                    <td><%= user.getCedula() %></td>
-                    <td><%= user.getEmail() %></td>
-                    <td><%= user.getTelefono() %></td>
-                    <td><%= user.getDireccion() %></td>
-                    <td class="text-center">
-                        <!-- Botón para editar el usuario (redirecciona con action=edit e id) -->
-                        <a href="UsuarioServlet?action=edit&id=<%= user.getId() %>"
-                           class="btn btn-outline-primary btn-sm btn-icon me-1" title="Editar">
-                            <i class="bi bi-arrow-repeat"></i>
-                        </a>
-
-                        <!-- Botón para eliminar el usuario (pide confirmación antes) -->
-                        <a href="UsuarioServlet?action=delete&id=<%= user.getId() %>"
-                           class="btn btn-outline-danger btn-sm btn-icon"
-                           onclick="return confirm('¿Eliminar este usuario?');" title="Eliminar">
-                            <i class="bi bi-trash"></i>
-                        </a>
-                    </td>
-                </tr>
-                <%
-                    }
-                %>
-            </tbody>
-        </table>
-
+                            <!-- Botón para eliminar usuario con confirmación -->
+                            <a href="UsuarioServlet?action=delete&id=<%= user.getId() %>"
+                               class="btn btn-outline-danger btn-sm"
+                               onclick="return confirm('¿Eliminar este usuario?');" title="Eliminar">
+                                <i class="bi bi-trash3"></i> Eliminar
+                            </a>
+                        </td>
+                    </tr>
+                    <%
+                        }
+                    %>
+                </tbody>
+            </table>
+        </div>
         <%
             } else {
         %>
-        <!-- Mostrar mensaje si no hay usuarios en la base de datos -->
-        <div class="alert alert-warning">No hay usuarios registrados.</div>
+        <!-- Si no hay usuarios registrados -->
+        <div class="alert alert-warning text-center">⚠️ No hay usuarios registrados.</div>
         <%
             }
         %>
-
     </div>
+
+    <!-- Scripts de Bootstrap para alertas, botones, etc. -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

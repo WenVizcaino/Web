@@ -8,62 +8,54 @@ import java.io.IOException;
 import DAO.UsuarioDAO;
 import Modelo.Usuario;
 
+// Anotación que indica la URL con la que se accede a este Servlet
 @WebServlet("/UsuarioServlet")
 public class UsuarioServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
-    // Ruta del JSP para insertar o editar usuario
-    private static final String INSERT_OR_EDIT = "/vista/formularioUsuario.jsp";
-    // Ruta del JSP para listar usuarios
-    private static final String LIST_USER = "/vista/listaUsuarios.jsp";
+    // Constantes con las rutas de las vistas JSP
+    private static final String INSERT_OR_EDIT = "/vista/formularioUsuario.jsp"; // Formulario para insertar o editar usuarios
+    private static final String LIST_USER = "/vista/listaUsuarios.jsp"; // Lista de usuarios
 
-    // Instancia del DAO para operaciones en BD
+    // Instancia del DAO que se encarga de la lógica de acceso a datos
     private UsuarioDAO dao = new UsuarioDAO();
 
-    
-    //Genera la accion
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        // Se obtiene la acción enviada como parámetro
+        // Se obtiene el parámetro 'action' de la URL para saber qué operación realizar
         String action = request.getParameter("action");
-        String forward;
+        String forward; // Variable que define a qué vista se va a redirigir
 
-        
-        
-        
-     //Accion para eliminar el usuario existente 
+        // Acción: eliminar usuario
         if ("delete".equalsIgnoreCase(action)) {
-            int id = Integer.parseInt(request.getParameter("id"));
-            dao.deleteUser(id);
-            // Se obtiene la lista actualizada y se envía a la vista
-            request.setAttribute("users", dao.getAllUsers());
-            forward = LIST_USER;
+            int id = Integer.parseInt(request.getParameter("id")); // Se obtiene el ID del usuario a eliminar
+            dao.deleteUser(id); // Se llama al método del DAO para eliminarlo
 
-            
-            
-            //Actualizar el usuario ya existente
+            request.setAttribute("users", dao.getAllUsers()); // Se actualiza la lista de usuarios en el request  
+            forward = LIST_USER; // Se redirige a la vista de lista
+
+        // Acción: editar usuario
         } else if ("edit".equalsIgnoreCase(action)) {
-            int id = Integer.parseInt(request.getParameter("id"));
-            Usuario user = dao.getUserById(id);
-            request.setAttribute("user", user);
-            forward = INSERT_OR_EDIT;
+            int id = Integer.parseInt(request.getParameter("id")); // Se obtiene el ID del usuario a editar
+            Usuario user = dao.getUserById(id); // Se obtiene el objeto Usuario desde el DAO
+            request.setAttribute("user", user); // Se añade al request para rellenar el formulario
+            forward = INSERT_OR_EDIT; // Se redirige al formulario de edición
 
-            //Accion que agrega nuevo usuario
+        // Acción: insertar nuevo usuario
         } else if ("insert".equalsIgnoreCase(action)) {
-            // Si la acción es insertar, se envía un nuevo usuario vacío para el formulario
-            Usuario user = new Usuario();
-            request.setAttribute("user", user);
+            Usuario user = new Usuario(); // Se crea un objeto Usuario vacío
+            request.setAttribute("user", user); // Se pasa al formulario para ingresar los datos
             forward = INSERT_OR_EDIT;
 
+        // Acción por defecto: mostrar lista de usuarios
         } else {
-            // Por defecto, se muestra la lista de usuarios
-            request.setAttribute("users", dao.getAllUsers());
+            request.setAttribute("users", dao.getAllUsers()); // Se obtiene la lista completa de usuarios
             forward = LIST_USER;
         }
 
-        //  Aquí se envía la solicitud y la respuesta a la página indicada para mostrarla al usuario
+        // Se hace el forward hacia la vista correspondiente
         RequestDispatcher dispatcher = request.getRequestDispatcher(forward);
         dispatcher.forward(request, response);
     }
@@ -72,7 +64,7 @@ public class UsuarioServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        // Se crea un objeto Usuario y se llenan sus campos con datos del formulario
+        // Se crea un objeto Usuario y se le asignan los datos del formulario
         Usuario user = new Usuario();
         user.setNombre(request.getParameter("nombre"));
         user.setCedula(request.getParameter("cedula"));
@@ -80,19 +72,19 @@ public class UsuarioServlet extends HttpServlet {
         user.setTelefono(request.getParameter("telefono"));
         user.setDireccion(request.getParameter("direccion"));
 
-        // Se obtiene el id para determinar si es insertar o actualizar
+        // Se obtiene el parámetro "id" para saber si se trata de una inserción o actualización
         String id = request.getParameter("id");
 
         if (id == null || id.isEmpty() || id.equals("0")) {
-            // Si no hay id, se agrega un nuevo usuario
+            // Si no hay ID, es un nuevo usuario
             dao.addUser(user);
         } else {
-            // Si hay id, se actualiza el usuario existente
+            // Si hay ID, se trata de una actualización
             user.setId(Integer.parseInt(id));
             dao.updateUser(user);
         }
 
-        // Después de guardar o actualizar, se obtiene la lista actualizada y se envía a la vista
+        // Se actualiza la lista de usuarios y se redirige a la vista
         request.setAttribute("users", dao.getAllUsers());
         RequestDispatcher dispatcher = request.getRequestDispatcher(LIST_USER);
         dispatcher.forward(request, response);
