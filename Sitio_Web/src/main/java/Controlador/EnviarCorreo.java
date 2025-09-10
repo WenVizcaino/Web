@@ -46,7 +46,7 @@ public class EnviarCorreo extends HttpServlet {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 
-		// Obtener los datos del formulario enviados desde EnviarCorreo.jsp
+		// Obtener los datos del formulario enviados desde EnviarC.jsp
 		String destinatario = request.getParameter("destinatario"); // Correo del receptor
 		String asunto = request.getParameter("asunto");             // Asunto del correo
 		String mensajeTexto = request.getParameter("mensaje");      // Cuerpo del mensaje
@@ -85,7 +85,7 @@ public class EnviarCorreo extends HttpServlet {
 			PrintWriter out = response.getWriter();
 			out.println("<html><body style='font-family:sans-serif; text-align:center; padding-top:40px;'>");
 			out.println("<h2 style='color:green;'>¡Correo enviado exitosamente a " + destinatario + "!</h2>");
-			out.println("<a href='EnviarCorreo.jsp'>← Volver</a>");
+			out.println("<a href='./index.jsp'>← Volver</a>");
 			out.println("</body></html>");
 
 		} catch (MessagingException e) {
@@ -95,7 +95,7 @@ public class EnviarCorreo extends HttpServlet {
 			out.println("<html><body style='font-family:sans-serif; text-align:center; padding-top:40px;'>");
 			out.println("<h2 style='color:red;'>Error al enviar correo:</h2>");
 			out.println("<p>" + e.getMessage() + "</p>");
-			out.println("<a href='EnviarCorreo.jsp'>← Volver</a>");
+			out.println("<a href='./index.jsp'>← Volver</a>");
 			out.println("</body></html>");
 		}
 	}
